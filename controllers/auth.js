@@ -28,7 +28,7 @@ export const signIn = async (req, res) => {
       {
         email: user.email,
         id: user._id,
-        name: user.name,
+        name: user.fullname,
       },
       process.env.TOKEN_KEY,
 

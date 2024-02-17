@@ -3,7 +3,7 @@
 //getRoomList
 //getParticipants
 import { User, Conversation, Message } from "../models/Schema.js";
-
+import mongoose from "mongoose";
 export const createRoom = async (room, userId, message, createdTime) => {
   try {
     const existingRoom = await Conversation.findOne({ roomId: room });
@@ -96,27 +96,34 @@ export const updateMessage = async (room, userId, message, createdTime) => {
   }
 };
 
-export const getRoomList = async (userId) => {
+export const getRoomList = async (req, res) => {
+  const { userId } = req.params;
+
+  const newUserId = new mongoose.Types.ObjectId(userId)
   try {
-    const conversationResult = await Conversation.find({ createdBy: userId });
-    return conversationResult;
+    const conversationResult = await Conversation.find({ participants:newUserId });
+    console.log(conversationResult,"roomlist")
+    res.status(200).json({ result: conversationResult });
   } catch (err) {
     console.log(err);
-    throw new Error({ errMessage: "Something went wrong. " });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
-export const getRoomDetails = async (room, userId) => {
+export const getRoomDetails = async (req,res) => {
+  const{room,userId} = req.params
+  const newUserId = new mongoose.Types.ObjectId(userId)
   try {
     const conversationResult = await Conversation.findOne({
       roomId: room,
-      createdBy: userId,
+      participants: newUserId,
     })
       .populate("participants")
       .populate("messages");
-    return conversationResult;
+      console.log(conversationResult,"roomdet")
+      res.status(200).json({ result: conversationResult });
   } catch (err) {
     console.log(err);
-    throw new Error({ errMessage: "Something went wrong. " });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };

@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
+import roomRoutes from "./routes/room.js";
 import { Server } from "socket.io";
 import { createRoom, joinRoom, updateMessage } from "./controllers/room.js";
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/auth", authRoutes);
+app.use("/", roomRoutes);
 const PORT = process.env.PORT;
 const CONNECTION_URL = process.env.CONNECTION_URL;
 const io = new Server({
