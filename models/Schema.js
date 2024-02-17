@@ -11,20 +11,22 @@ const messageSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
   },
-  recipientId: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  ],
+  recipientId: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   content: { type: String, required: true },
   timestamp: { type: Date, required: true },
 });
 
 const conversationSchema = new mongoose.Schema({
+  roomId: { type: String, required: true },
   participants: [
     { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   ],
   messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 const contactSchema = new mongoose.Schema({
