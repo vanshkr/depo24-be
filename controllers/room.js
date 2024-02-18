@@ -4,7 +4,7 @@
 //getParticipants
 import { User, Conversation, Message } from "../models/Schema.js";
 import mongoose from "mongoose";
-export const createRoom = async (room, userId, message, createdTime) => {
+export const createRoom = async (room, userId, message, timestamp) => {
   try {
     const existingRoom = await Conversation.findOne({ roomId: room });
     if (existingRoom) throw new Error({ errMsg: "Room already exist. " });
@@ -12,7 +12,7 @@ export const createRoom = async (room, userId, message, createdTime) => {
     if (!existingUser) throw new Error({ errMsg: "User doesn't exist. " });
     const messageResult = await Message.create({
       content: message,
-      timestamp: createdTime,
+      timestamp: timestamp,
     });
     const newParticipants = [userId];
     const newMessages = [messageResult._id];
@@ -29,7 +29,7 @@ export const createRoom = async (room, userId, message, createdTime) => {
   }
 };
 
-export const joinRoom = async (room, userId, message, createdTime) => {
+export const joinRoom = async (room, userId, message, timestamp) => {
   try {
     const existingRoom = await Conversation.findOne({
       roomId: room,
@@ -41,7 +41,7 @@ export const joinRoom = async (room, userId, message, createdTime) => {
     if (!existingUser) throw new Error({ errMsg: "User doesn't exist. " });
     const messageResult = await Message.create({
       content: message,
-      timestamp: createdTime,
+      timestamp: timestamp,
     });
     const newParticipants = [...existingRoom.participants, userId];
     const newMessages = [...existingRoom.messages, messageResult._id];
@@ -62,7 +62,7 @@ export const joinRoom = async (room, userId, message, createdTime) => {
   }
 };
 
-export const updateMessage = async (room, userId, message, createdTime) => {
+export const updateMessage = async (room, userId, message, timestamp) => {
   try {
     const existingRoom = await Conversation.findOne({
       roomId: room,
@@ -77,7 +77,7 @@ export const updateMessage = async (room, userId, message, createdTime) => {
       senderId: userId,
       recipientId: newReceipients,
       content: message,
-      timestamp: createdTime,
+      timestamp: timestamp,
     });
     const newMessages = [...existingRoom.messages, messageResult._id];
     const conversationResult = await Conversation.updateOne(
@@ -98,11 +98,9 @@ export const updateMessage = async (room, userId, message, createdTime) => {
 
 export const getRoomList = async (req, res) => {
   const { userId } = req.params;
-
   const newUserId = new mongoose.Types.ObjectId(userId)
   try {
     const conversationResult = await Conversation.find({ participants:newUserId });
-    console.log(conversationResult,"roomlist")
     res.status(200).json({ result: conversationResult });
   } catch (err) {
     console.log(err);
@@ -120,7 +118,6 @@ export const getRoomDetails = async (req,res) => {
     })
       .populate("participants")
       .populate("messages");
-      console.log(conversationResult,"roomdet")
       res.status(200).json({ result: conversationResult });
   } catch (err) {
     console.log(err);

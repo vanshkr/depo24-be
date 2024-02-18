@@ -33,9 +33,9 @@ io.on("connection", (socket) => {
   socket.on("join_room", async (data) => {
     const { username, room, userId } = data;
     const allClientMsg = `${username} has joined the chat room`;
-    const creatorMsg = `Welcome ${username}`;
-    let createdTime = Date.now();
-    const res = await joinRoom(room, userId, allClientMsg, createdTime);
+    let timestamp = Date.now();
+    let senderId;
+    const res = await joinRoom(room, userId, allClientMsg, timestamp);
     if (res.errMessage) {
       socket.emit("error_message", {
         message: res.errMessage,
@@ -45,28 +45,27 @@ io.on("connection", (socket) => {
 
     socket.join(room);
 
-    socket.to(room).emit("receive_message", {
-      message: allClientMsg,
+    io.in(room).emit("receive_message", {
+      content: allClientMsg,
       username,
-      createdTime,
-      userId,
-      messageType: 1,
+      timestamp,
+      senderId,
     });
   });
   socket.on("create_room", async (data) => {
     try {
       const { username, room, userId } = data;
       const allClientMsg = `${username} has joined the chat room`;
-      const creatorMsg = `Welcome ${username}`;
-      let createdTime = Date.now();
-      await createRoom(room, userId, allClientMsg, createdTime);
+      let timestamp = Date.now();
+      let senderId;
+      await createRoom(room, userId, allClientMsg, timestamp);
       socket.join(room);
 
-      socket.to(room).emit("receive_message", {
-        message: allClientMsg,
-        createdTime,
-        userId,
-        messageType: 1,
+      io.in(room).emit("receive_message", {
+        content: allClientMsg,
+        username,
+        timestamp,
+        senderId,
       });
     } catch (err) {
       console.log(err);
@@ -78,10 +77,10 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", async (data) => {
     try {
-      const { message, username, userId, room } = data;
-      const createdTime = Date.now();
-      await updateMessage(room, userId, message, createdTime);
-      io.in(room).emit("receive_message", data);
+      const {content: message, username,senderId: userId, room } = data;
+      const timestamp = Date.now();
+      await updateMessage(room, userId, message, timestamp);
+      io.in(room).emit("receive_message", {...data,timestamp});
     } catch (err) {
       console.log(err);
       socket.emit("error_message", {
@@ -89,6 +88,13 @@ io.on("connection", (socket) => {
       });
     }
   });
+
+  socket.on("join",(data)=>{
+    socket.join(data)
+  })
+  socket.on("leave",(data)=>{
+    socket.leave(data)
+  })
 });
 
 mongoose
