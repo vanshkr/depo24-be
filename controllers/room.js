@@ -1,15 +1,13 @@
-//createRoom
-//getRoom
-//getRoomList
-//getParticipants
+
 import { User, Conversation, Message } from "../models/Schema.js";
 import mongoose from "mongoose";
 export const createRoom = async (room, userId, message, timestamp) => {
+  const newUserId = new mongoose.Types.ObjectId(userId)
   try {
-    const existingRoom = await Conversation.findOne({ roomId: room });
-    if (existingRoom) throw new Error({ errMsg: "Room already exist. " });
+    const existingRoom = await Conversation.findOne({ roomId: room,participants:newUserId });
+    if (existingRoom) throw new Error("Room already exist. ");
     const existingUser = await User.findById({ _id: userId });
-    if (!existingUser) throw new Error({ errMsg: "User doesn't exist. " });
+    if (!existingUser) throw new Error("User doesn't exist. ");
     const messageResult = await Message.create({
       content: message,
       timestamp: timestamp,
@@ -24,21 +22,23 @@ export const createRoom = async (room, userId, message, timestamp) => {
     await conversationResult.save();
     return conversationResult;
   } catch (err) {
-    console.log(err);
-    throw new Error({ errMessage: "Something went wrong. " });
+    throw new Error( "Error while creating room . ");
   }
 };
 
 export const joinRoom = async (room, userId, message, timestamp) => {
+  const newUserId = new mongoose.Types.ObjectId(userId)
   try {
     const existingRoom = await Conversation.findOne({
       roomId: room,
+      participants:newUserId
+
     });
-    if (!existingRoom) throw new Error({ errMsg: "Room already exist. " });
+    if (!existingRoom) throw new Error("Room already exist. ");
     if (existingRoom.participants.some((id) => id.equals(userId)))
-      throw new Error({ errMsg: "Participant already present. " });
+      throw new Error("Participant already present. " );
     const existingUser = await User.findById({ _id: userId });
-    if (!existingUser) throw new Error({ errMsg: "User doesn't exist. " });
+    if (!existingUser) throw new Error("User doesn't exist. ");
     const messageResult = await Message.create({
       content: message,
       timestamp: timestamp,
@@ -57,8 +57,7 @@ export const joinRoom = async (room, userId, message, timestamp) => {
     );
     return conversationResult;
   } catch (err) {
-    console.log(err);
-    throw new Error({ errMessage: "Something went wrong. " });
+    throw new Error("Error while joining room . ");
   }
 };
 
@@ -91,8 +90,7 @@ export const updateMessage = async (room, userId, message, timestamp) => {
     );
     return conversationResult;
   } catch (err) {
-    console.log(err);
-    throw new Error({ errMessage: "Something went wrong. " });
+    throw new Error("Error while updating message. ");
   }
 };
 
@@ -103,8 +101,7 @@ export const getRoomList = async (req, res) => {
     const conversationResult = await Conversation.find({ participants:newUserId });
     res.status(200).json({ result: conversationResult });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Error while fetching room list." });
   }
 };
 
@@ -120,7 +117,6 @@ export const getRoomDetails = async (req,res) => {
       .populate("messages");
       res.status(200).json({ result: conversationResult });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Error while getting room details. " });
   }
 };

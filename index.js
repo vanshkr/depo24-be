@@ -31,26 +31,25 @@ app.get("/status", (_, res) => {
 
 io.on("connection", (socket) => {
   socket.on("join_room", async (data) => {
-    const { username, room, userId } = data;
-    const allClientMsg = `${username} has joined the chat room`;
-    let timestamp = Date.now();
-    let senderId;
-    const res = await joinRoom(room, userId, allClientMsg, timestamp);
-    if (res.errMessage) {
-      socket.emit("error_message", {
-        message: res.errMessage,
+    try{
+      const { username, room, userId } = data;
+      const allClientMsg = `${username} has joined the chat room`;
+      let timestamp = Date.now();
+      let senderId;
+      console.log("before")
+      const res = await joinRoom(room, userId, allClientMsg, timestamp);  
+      console.log(res,"res")
+      socket.join(room);  
+      io.in(room).emit("receive_message", {
+        content: allClientMsg,
+        username,
+        timestamp,
+        senderId,
       });
-      return;
+    }catch(err){
+      console.log(err)
+      return err;
     }
-
-    socket.join(room);
-
-    io.in(room).emit("receive_message", {
-      content: allClientMsg,
-      username,
-      timestamp,
-      senderId,
-    });
   });
   socket.on("create_room", async (data) => {
     try {
@@ -58,7 +57,8 @@ io.on("connection", (socket) => {
       const allClientMsg = `${username} has joined the chat room`;
       let timestamp = Date.now();
       let senderId;
-      await createRoom(room, userId, allClientMsg, timestamp);
+      const res = await createRoom(room, userId, allClientMsg, timestamp);
+      console.log(res,"res")
       socket.join(room);
 
       io.in(room).emit("receive_message", {
@@ -68,10 +68,7 @@ io.on("connection", (socket) => {
         senderId,
       });
     } catch (err) {
-      console.log(err);
-      socket.emit("error_message", {
-        message: err,
-      });
+      return err;
     }
   });
 
@@ -82,10 +79,7 @@ io.on("connection", (socket) => {
       await updateMessage(room, userId, message, timestamp);
       io.in(room).emit("receive_message", {...data,timestamp});
     } catch (err) {
-      console.log(err);
-      socket.emit("error_message", {
-        message: err,
-      });
+      return err
     }
   });
 
