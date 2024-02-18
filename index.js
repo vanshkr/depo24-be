@@ -20,7 +20,7 @@ const PORT = process.env.PORT;
 const CONNECTION_URL = process.env.CONNECTION_URL;
 const io = new Server({
   cors: {
-    origin: process.env.HOST,
+    origin: true,
     methods: ["GET", "POST"],
     credentials: true,
   },
