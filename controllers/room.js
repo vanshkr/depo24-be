@@ -2,36 +2,40 @@
 import { User, Conversation, Message } from "../models/Schema.js";
 import mongoose from "mongoose";
 export const createRoom = async (room, userId, message, timestamp) => {
-  const newUserId = new mongoose.Types.ObjectId(userId)
+  
   try {
-    const existingRoom = await Conversation.findOne({ roomId: room,participants:newUserId });
-    if (existingRoom) throw new Error("Room already exist. ");
-    const existingUser = await User.findById({ _id: userId });
-    if (!existingUser) throw new Error("User doesn't exist. ");
+    const existingRoom = await Conversation.findOne({ roomId: room});
+    if (existingRoom) throw new Error("Room already exists.");
+    
+    const existingUser = await User.findById(userId);
+    if (!existingUser) throw new Error("User doesn't exist.");
+    
     const messageResult = await Message.create({
       content: message,
       timestamp: timestamp,
     });
+    
     const newParticipants = [userId];
     const newMessages = [messageResult._id];
+    
     const conversationResult = await Conversation.create({
       roomId: room,
       participants: newParticipants,
       messages: newMessages,
     });
-    await conversationResult.save();
+    
     return conversationResult;
   } catch (err) {
-    throw new Error( "Error while creating room . ");
+    throw new Error("Error while creating room.");
   }
 };
 
 export const joinRoom = async (room, userId, message, timestamp) => {
-  const newUserId = new mongoose.Types.ObjectId(userId)
+ 
   try {
     const existingRoom = await Conversation.findOne({
       roomId: room,
-      participants:newUserId
+      
 
     });
     if (!existingRoom) throw new Error("Room already exist. ");

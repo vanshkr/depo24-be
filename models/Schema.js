@@ -25,18 +25,8 @@ const conversationSchema = new mongoose.Schema({
   messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
 });
 
-const contactSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  contactUserId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-});
-
 const User = mongoose.model("User", userSchema);
 const Message = mongoose.model("Message", messageSchema);
 const Conversation = mongoose.model("Conversation", conversationSchema);
-const Contact = mongoose.model("Contact", contactSchema);
 
-export { User, Message, Conversation, Contact };
+export { User, Message, Conversation};

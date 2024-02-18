@@ -36,9 +36,7 @@ io.on("connection", (socket) => {
       const allClientMsg = `${username} has joined the chat room`;
       let timestamp = Date.now();
       let senderId;
-      console.log("before")
-      const res = await joinRoom(room, userId, allClientMsg, timestamp);  
-      console.log(res,"res")
+      await joinRoom(room, userId, allClientMsg, timestamp);  
       socket.join(room);  
       io.in(room).emit("receive_message", {
         content: allClientMsg,
@@ -47,7 +45,6 @@ io.on("connection", (socket) => {
         senderId,
       });
     }catch(err){
-      console.log(err)
       return err;
     }
   });
@@ -58,7 +55,6 @@ io.on("connection", (socket) => {
       let timestamp = Date.now();
       let senderId;
       const res = await createRoom(room, userId, allClientMsg, timestamp);
-      console.log(res,"res")
       socket.join(room);
 
       io.in(room).emit("receive_message", {
